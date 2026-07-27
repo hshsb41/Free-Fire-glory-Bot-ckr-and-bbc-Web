@@ -781,6 +781,68 @@ footer span { color: var(--gold); }
     .toggle { width: 108px; }
     .dropdown-trigger { min-width: 84px; }
 }
+
+/* ==========================================================================
+   15. MEDIA CARDS — framed + captioned images (Payment QR / instructions)
+   ========================================================================== */
+.media-card {
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--elev-2);
+}
+
+.media-frame {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 2px solid var(--surface-3);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.media-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Payment QR — compact, square, centered (not full width) */
+.media-frame.qr-frame {
+    width: 148px;
+    height: 148px;
+}
+
+/* Instructional / step image — wider, portrait-friendly, capped height */
+.media-frame.wide-frame {
+    width: 100%;
+    height: 200px;
+}
+
+.media-caption {
+    width: 100%;
+    text-align: center;
+    padding-top: 9px;
+    border-top: 1px solid var(--surface-3);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.media-caption i { color: var(--gold); font-size: 10px; }
 </style>
 </head>
 <body>
@@ -877,64 +939,13 @@ footer span { color: var(--gold); }
         </div>
     </div>
 
-    <!-- Settings panel -->
+    <!-- Settings panel (now shows a step image instead of approval settings) -->
     <div class="settings-panel" id="settingsPanel">
-        <div class="settings-header"><span class="accent-bar"></span>Approval Method</div>
-
-        <div class="setting-row">
-            <span class="setting-label">Auto Approval</span>
-            <div class="toggle" data-state="off" id="approvalToggle">
-                <div class="toggle-option selected off" data-value="off">OFF</div>
-                <div class="toggle-option" data-value="on">ON</div>
+        <div class="media-card">
+            <div class="media-frame wide-frame">
+                <img src="https://i.ibb.co/SGDr3Sc/IMG-20260327-234910-055.jpg" alt="Click Buy Now">
             </div>
-        </div>
-
-        <div class="setting-row">
-            <span class="setting-label">Level Requirement</span>
-            <div class="dropdown" data-name="LV.">
-                <div class="dropdown-trigger">
-                    <span class="dropdown-value">DEFAULT</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="dropdown-menu">
-                    <div class="dropdown-menu-item active" data-value="DEFAULT">DEFAULT</div>
-                    <div class="dropdown-menu-item" data-value="LV. 20+">LV. 20+</div>
-                    <div class="dropdown-menu-item" data-value="LV. 40+">LV. 40+</div>
-                    <div class="dropdown-menu-item" data-value="LV. 60+">LV. 60+</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="setting-row">
-            <span class="setting-label">BR Ranked</span>
-            <div class="dropdown" data-name="BR-RANKED">
-                <div class="dropdown-trigger">
-                    <span class="dropdown-value">DEFAULT</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="dropdown-menu">
-                    <div class="dropdown-menu-item active" data-value="DEFAULT">DEFAULT</div>
-                    <div class="dropdown-menu-item" data-value="BRONZE+">BRONZE+</div>
-                    <div class="dropdown-menu-item" data-value="GOLD+">GOLD+</div>
-                    <div class="dropdown-menu-item" data-value="HEROIC+">HEROIC+</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="setting-row">
-            <span class="setting-label">CS Ranked</span>
-            <div class="dropdown" data-name="CS-RANKED">
-                <div class="dropdown-trigger">
-                    <span class="dropdown-value">DEFAULT</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="dropdown-menu">
-                    <div class="dropdown-menu-item active" data-value="DEFAULT">DEFAULT</div>
-                    <div class="dropdown-menu-item" data-value="BRONZE+">BRONZE+</div>
-                    <div class="dropdown-menu-item" data-value="GOLD+">GOLD+</div>
-                    <div class="dropdown-menu-item" data-value="HEROIC+">HEROIC+</div>
-                </div>
-            </div>
+            <div class="media-caption"><i class="fas fa-hand-pointer"></i>Click Buy Now</div>
         </div>
     </div>
 
@@ -943,6 +954,15 @@ footer span { color: var(--gold); }
         <span class="badge">Limited Offer</span>
         <p class="price-sub">PER SQUAD PRICE</p>
         <div class="price-amount">380<sup>NPR</sup></div>
+
+        <!-- Payment QR — sits directly above the Buy Now button -->
+        <div class="media-card">
+            <div class="media-frame qr-frame">
+                <img src="https://i.ibb.co/xtkSDp54/qr.jpg" alt="Payment QR">
+            </div>
+            <div class="media-caption"><i class="fas fa-qrcode"></i>Payment</div>
+        </div>
+
         <a href="https://wa.me/9779840825493?text=I%20want%20to%20buy%20glory%20bot" class="btn-buy" id="buyBtn">
             <i class="fab fa-whatsapp"></i> BUY NOW
         </a>
