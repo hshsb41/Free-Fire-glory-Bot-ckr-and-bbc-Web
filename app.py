@@ -339,43 +339,6 @@ body {
   display:block; object-fit:contain; object-position:center;
 }
 
-/* Hero profile card — 3D tilt */
-.hero-card {
-  display:none;
-  background:var(--glass);
-  backdrop-filter:blur(var(--blur)) saturate(1.35);
-  -webkit-backdrop-filter:blur(var(--blur)) saturate(1.35);
-  border-radius:var(--r-lg);
-  padding:16px;
-  box-shadow:var(--e2), var(--e-inset);
-  animation:riseIn .28s var(--ease) .03s both;
-  transition:transform .2s var(--ease), box-shadow .2s var(--ease);
-  cursor:default;
-}
-.hero-top {
-  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
-}
-.hero-name {
-  font-family:'Sora',sans-serif;
-  font-size:18px; font-weight:800;
-  letter-spacing:.2px; line-height:1.2;
-  word-break:break-word;
-}
-.hero-uid {
-  font-size:11px; font-weight:600; color:var(--text-2);
-  margin-top:4px; display:flex; align-items:center; gap:6px;
-}
-.ban-pill {
-  flex-shrink:0;
-  font-size:9px; font-weight:800;
-  letter-spacing:.4px; text-transform:uppercase;
-  padding:6px 10px; border-radius:999px;
-  box-shadow:var(--e1);
-}
-.ban-pill.ok { background:var(--success-soft); color:var(--success); }
-.ban-pill.bad { background:var(--danger-soft); color:var(--danger); }
-
-
 /* Section labels */
 .section-label {
   display:none;
@@ -755,23 +718,6 @@ function attachRipple(el) {
 }
 document.querySelectorAll('.btn-search, .btn-buy').forEach(attachRipple);
 
-/* Light 3D tilt on hero */
-(function() {
-  const card = () => document.getElementById('heroCard');
-  document.addEventListener('mousemove', (e) => {
-    const el = card();
-    if (!el || el.style.display === 'none') return;
-    const r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    el.style.transform = `perspective(900px) rotateY(${x*3}deg) rotateX(${-y*2.5}deg)`;
-  });
-  document.addEventListener('mouseleave', () => {
-    const el = card();
-    if (el) el.style.transform = '';
-  });
-})();
-
 function animateCount(el, targetValue, { prefix='', suffix='', duration=420 } = {}) {
   const numeric = parseInt(String(targetValue).replace(/[^\d]/g, ''), 10);
   if (Number.isNaN(numeric)) { el.innerText = targetValue; return; }
@@ -800,11 +746,6 @@ function validateUid(show=true) {
   return valid;
 }
 
-function stripColorTags(s) {
-  if (!s) return '';
-  return String(s).replace(/\[[0-9A-Fa-f]{6}\]/g, '').replace(/\[[A-Za-z]+\]/g, '').trim();
-}
-
 function setText(id, val, fallback='—') {
   const el = document.getElementById(id);
   if (el) el.innerText = (val === 0 || val) ? String(val) : fallback;
@@ -820,9 +761,9 @@ async function fetchData(e) {
   const skeleton = document.getElementById('skeletonBlock');
   const bannerCard = document.getElementById('bannerCard');
   const bannerImg = document.getElementById('playerBanner');
-    const guildGrid = document.getElementById('guildGrid');
+  const guildGrid = document.getElementById('guildGrid');
   const settings = document.getElementById('settingsPanel');
-    const labelG = document.getElementById('labelGuild');
+  const labelG = document.getElementById('labelGuild');
 
   searchBtn.classList.add('loading');
   searchBtn.disabled = true;
@@ -849,15 +790,14 @@ async function fetchData(e) {
     }
 
     const d = payload.data || {};
-    const g = d.GuildInformation || d.GuildInfo || {};
-    const leader = d.LeaderInformation || {};
-    const guildName = g.GuildName || g.guild_name;
-    const guildId = g.GuildID || g.GuildId || g.guild_id;
+    const g = d.GuildInformation || {};
+    const guildName = g.GuildName;
+    const guildId = g.GuildID;
 
     if (!guildName && !guildId) {
       const empty = document.getElementById('emptyState');
       if (empty) empty.style.display = 'flex';
-      showToast('No guild data for this UID.', 'info');
+      showToast('No guild found for this UID.', 'info');
       SoundEngine.error();
       return;
     }
@@ -865,8 +805,8 @@ async function fetchData(e) {
     setText('g_name', guildName);
     setText('g_id', guildId);
     animateCount(document.getElementById('g_level'), g.GuildLevel || 0, { prefix: 'Lv ' });
-    const mem = g.LiveMembers != null ? g.LiveMembers : g.GuildMember;
-    const max = g.MaxMembers != null ? g.MaxMembers : g.GuildCapacity;
+    const mem = g.LiveMembers;
+    const max = g.MaxMembers;
     if (mem != null && max != null) {
       document.getElementById('g_members').innerText = mem + ' / ' + max;
       const cap = document.getElementById('g_capacity');
@@ -875,7 +815,7 @@ async function fetchData(e) {
       animateCount(document.getElementById('g_members'), mem || 0);
       setText('g_capacity', max);
     }
-    setText('g_owner', leader.Name || g.GuildOwner || '—');
+    setText('g_owner', g.LeaderName || '—');
 
     labelG.style.display = 'flex';
     guildGrid.style.display = 'grid';
@@ -973,18 +913,6 @@ def api_player_info():
 
     if not data or data.get("status") != "success":
         return jsonify(success=False, error="No data found for this UID."), 404
-
-    # Normalize for frontend (support both old GuildInfo and new GuildInformation)
-    if "GuildInformation" in data and "GuildInfo" not in data:
-        gi = data["GuildInformation"]
-        data["GuildInfo"] = {
-            "GuildName": gi.get("GuildName"),
-            "GuildID": gi.get("GuildID"),
-            "GuildLevel": gi.get("GuildLevel"),
-            "GuildMember": gi.get("LiveMembers"),
-            "GuildCapacity": gi.get("MaxMembers"),
-            "GuildOwner": (data.get("LeaderInformation") or {}).get("Name"),
-        }
 
     return jsonify(success=True, data=data)
 
